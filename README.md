@@ -6,6 +6,16 @@ CP363 (Database Systems, Wilfrid Laurier University) term project. A full databa
 - Moosa Ahmed
 - Muhammad Saim Bin Asif
 
+## Table of Contents
+- [Team](#team-26)
+- [Stack](#stack)
+- [What This Project Covers](#what-this-project-covers)
+- [Database Schema](#database-schema)
+- [Repo Structure](#repo-structure)
+- [Environment Configuration](#environment-configuration)
+- [Running It](#running-it)
+- [Full Documentation](#full-documentation)
+
 ## Stack
 - MySQL (schema design, queries, views)
 - Python — `mysql-connector-python`, Tkinter (GUI)
