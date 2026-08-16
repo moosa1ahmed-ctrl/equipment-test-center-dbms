@@ -1,102 +1,165 @@
-# Equipment Test Center — DBMS Project
+# Smart Parking: Optimization vs. Reinforcement Learning
 
-CP363 (Database Systems, Wilfrid Laurier University) term project. A full database lifecycle project — from ER modeling through a normalized relational schema to a working desktop application — for managing an equipment testing center: clients, lab bookings, equipment, technicians, test sessions, reports, and invoicing.
-
-**Team 26**
-- Moosa Ahmed
-- Muhammad Saim Bin Asif
+CP468 – Artificial Intelligence | Fall 2025 | AI Term Project, Group Project
 
 ## Table of Contents
-- [Team](#team-26)
-- [Stack](#stack)
-- [What This Project Covers](#what-this-project-covers)
-- [Database Schema](#database-schema)
-- [Repo Structure](#repo-structure)
-- [Environment Configuration](#environment-configuration)
-- [Running It](#running-it)
-- [Full Documentation](#full-documentation)
+- [Project Overview](#project-overview)
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Team Members](#team-members)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Running the Notebooks](#running-the-notebooks)
+- [Problem Setup](#problem-setup)
+- [Algorithm Reference](#algorithm-reference)
+- [Test Scenarios](#test-scenarios)
+- [Testing](#testing)
+- [Results](#results)
+- [Known Issues / Limitations](#known-issues--limitations)
+- [Project Management](#project-management)
+- [License](#license)
 
-## Stack
-- MySQL (schema design, queries, views)
-- Python — `mysql-connector-python`, Tkinter (GUI)
+## Project Overview
+A driver navigating toward a destination must pick a parking lot from several nearby options, but travel time, lot availability, and cost all shift while they're still en route. This project models that as a graph search / sequential decision problem and compares two solution strategies for choosing — and updating — that decision on the fly: a direct graph-search optimization, and a reinforcement learning agent that learns the same behaviour through trial and error.
 
-## What this project covers
-Built across six assignments spanning the full database design lifecycle:
-1. **ER/EER Modeling** — 11 entities, weak entities, multivalued attributes, cardinality constraints
-2. **Schema Design** — relational schema in MySQL Workbench, with PK/FK constraints enforcing referential integrity
-3. **Construction & Basic Queries** — populated tables, 10+ queries including subqueries, correlated subqueries, and window functions; 3 views
-4. **Advanced Queries** — joins, set operations, grouped/statistical queries, execution plan analysis, and 3 advanced views (subqueries in SELECT/FROM/WHERE); a CLI menu app in Python
-5. **Normalization** — verified/decomposed to 3NF and BCNF using functional dependency analysis
-6. **Application Demonstration** — a full Tkinter GUI over the normalized schema, plus final documentation with relational algebra notation
+**In Scope:**
+- Graph-based road network and parking-lot model
+- Dijkstra + hill-climbing optimization solver
+- Q-learning reinforcement learning solver
+- Comparison across 3 constraint scenarios (baseline, distance-constrained, availability-constrained)
+- IEEE-format written report
 
-## Database schema
+**Out of Scope:**
+- Real-world map/traffic data integration
+- Live/production deployment
+- More than 2 candidate parking lots
+- UI or visualization beyond notebook output
 
-11 tables, including two junction tables for many-to-many relationships:
+## Features
 
-| Table | Purpose |
+**Must Have**
+- Working Dijkstra + hill-climbing solver ([`Optimization.ipynb`](notebooks/Optimization.ipynb))
+- Working Q-learning solver ([`Reinforcement_Learning.ipynb`](notebooks/Reinforcement_Learning.ipynb))
+- Shared objective function (travel time + cost + walking distance, subject to availability/max-walk constraints)
+- Comparison across 3 test scenarios, logged to [`results/Results.xlsx`](results/Results.xlsx)
+- Full IEEE-format writeup
+
+**Should Have**
+- Hyperparameter documentation for the RL agent (learning rate, discount factor, exploration rate)
+
+**Could Have (Stretch Goals)**
+- Additional parking lots / more complex graph
+- Dynamic re-routing mid-trip in response to changing conditions
+- Live traffic or pricing data instead of static in-notebook scenarios
+
+## Technology Stack
+| Layer | Technology |
 |---|---|
-| `Client` | Customers who book lab time and equipment |
-| `Technician` | Staff who run test sessions and approve reports |
-| `Equipment` | Testable equipment, with status (`Available` / `In Use` / `Under Maintenance`) |
-| `Lab` | Physical lab spaces with capacity |
-| `Test` | Catalog of test types |
-| `Booking` | A client's reservation of a lab, with status tracking |
-| `Test_Session` | A specific test run by a technician, with result and duration |
-| `Report` | Findings from a test session, approved by a technician |
-| `Invoice` | Billing tied to a booking |
-| `Maintenance_Record` | Equipment maintenance history |
-| `Booking_Equipment` / `TestSession_Equipment` | Junction tables linking equipment to bookings and test sessions (many-to-many) |
+| Language | Python 3 |
+| Environment | Jupyter Notebook |
+| Algorithms | Dijkstra's algorithm, hill climbing, Q-learning |
+| Data / Results | pandas, Excel (`Results.xlsx`) |
+| Version Control | Git, GitHub |
 
-Full `CREATE TABLE` statements with constraints are in [`src/Table definitions.sql`](src/Table%20definitions.sql).
+## Team Members
+| Name |
+|---|
+| Moosa Ahmed |
+| Lucas Matheson |
+| Bhavnoor Dhillon |
+| Reilly MacDonald |
 
-## Repo structure
+## Repository Structure
 ```
-├── src/
-│   ├── Table definitions.sql
-│   ├── Sample data population.sql
-│   ├── Queries.sql
-│   ├── Views.sql
-│   ├── Advanced Queries.sql
-│   ├── Advanced Views.sql
-│   ├── Menu-Queries.sql       # queries used by the CLI app
-│   ├── cli_menu_app.py        # Assignment 4 — CLI query menu
-│   └── gui_app.py             # Assignment 6 — Tkinter GUI application
-├── docs/
-│   ├── Assignment-01-ER-Modelling.pdf
-│   ├── Assignment-02-Schema-Design.pdf
-│   ├── Assignment-03-Construction-Queries.pdf
-│   ├── Assignment-04-Advanced-Queries.pdf
-│   ├── Assignment-05-Normalization.pdf
-│   └── Final-Documentation.pdf
+smart-parking-optimization-rl/
+├── README.md
 ├── requirements.txt
-└── .gitignore
+├── notebooks/
+│   ├── Optimization.ipynb
+│   └── Reinforcement_Learning.ipynb
+├── results/
+│   └── Results.xlsx
+└── docs/
+    └── CP468-TP-35-writeup.pdf   ← full IEEE-format writeup
 ```
 
-## Environment Configuration
+## Getting Started
 
-Database credentials are read from environment variables — never hardcoded in source.
+### Prerequisites
+- Python 3
+- Jupyter Notebook or JupyterLab
 
-| Variable | Description | Default |
-|---|---|---|
-| `DB_HOST` | MySQL host | `localhost` |
-| `DB_PORT` | MySQL port | `3306` |
-| `DB_USER` | MySQL username | `root` |
-| `DB_PASSWORD` | MySQL password | *(none — set your own)* |
-| `DB_NAME` | Database name | `EquipmentTestCenterDB` |
-
-## Running it
+### Running the Notebooks
 ```bash
+git clone https://github.com/moosa1ahmed-ctrl/smart-parking-optimization-r1.git
+cd smart-parking-optimization-r1
 pip install -r requirements.txt
+jupyter notebook notebooks/
+```
+Each notebook runs independently — no external data files needed, the road network and parking-lot scenarios are defined in-notebook.
 
-# 1. Create and populate the database
-mysql -u root -p < "src/Table definitions.sql"
-mysql -u root -p EquipmentTestCenterDB < "src/Sample data population.sql"
+## Problem Setup
+A small directed road graph (`S → A/B → C → P1/P2 → D`) where edge weights are travel times, and two candidate parking lots (`P1`, `P2`) each have a cost, a walking distance from the lot to the destination, an availability flag, and a maximum-walk constraint.
 
-# 2. Run either interface
-DB_PASSWORD=your_password python src/cli_menu_app.py
-# or
-DB_PASSWORD=your_password python src/gui_app.py
+**Shared objective, both approaches solve this:**
+```
+minimize:  travel_time + α · parking_cost + β · walking_distance
+subject to: lot must be available, and walking_distance ≤ max_walk
 ```
 
-## Full documentation
-See [`docs/Final-Documentation.pdf`](docs/Final-Documentation.pdf) for the complete project writeup, including relational algebra notation for all queries and design retrospective.
+## Algorithm Reference
+
+### Optimization ([`Optimization.ipynb`](notebooks/Optimization.ipynb))
+1. Run Dijkstra from the start node `S` to get shortest travel time to every node.
+2. For each parking lot, check feasibility (`available == True` and `walk_dist ≤ max_walk`).
+3. Hill-climb over the feasible lots using the weighted objective above (`α = 1.0` for cost, `β = 0.01` for walking distance) to pick the single best lot.
+4. Deterministic and instant — recomputed from scratch whenever conditions change.
+
+### Reinforcement Learning ([`Reinforcement_Learning.ipynb`](notebooks/Reinforcement_Learning.ipynb))
+Formulated as a Markov Decision Process:
+
+| Element | Definition |
+|---|---|
+| States | Current node — `{S, A, B, C, P1, P2, TERMINAL}` |
+| Actions | Move to an adjacent node, or `park` (only valid at P1/P2) |
+| Reward | `-travel_time` per move; on `park`, `-(cost + β · walk_dist)` if the lot is available and within `max_walk`, otherwise a large penalty (`-1000`) for an invalid choice |
+| Policy | ε-greedy during training (explore vs. exploit), greedy at evaluation |
+
+**Hyperparameters**
+
+| Hyperparameter | Value |
+|---|---|
+| Learning rate (α) | 0.1 |
+| Discount factor (γ) | 0.9 |
+| Exploration rate (ε) | 0.2 |
+| Episodes | 5,000 |
+| Walking-distance weight (β) | 0.01 |
+
+## Test Scenarios
+Run identically in both notebooks so results are directly comparable:
+
+| # | Scenario | Expected behaviour |
+|---|---|---|
+| 1 | Baseline | Both lots feasible — agent should pick the better cost/distance trade-off |
+| 2 | P2 too far | P2's walking distance exceeds `max_walk`, forcing P1 |
+| 3 | P1 unavailable | P1 is marked unavailable, forcing P2 |
+
+## Testing
+Both notebooks were run end-to-end and manually verified: every code cell executes without errors, and every cell expected to produce output (test-case results, comparison tables) does so. There is no separate automated test suite — correctness is verified by inspecting notebook output against the expected behaviour in the table above.
+
+## Results
+Comparison metrics — cost, adaptability, and convergence across the three scenarios — are in [`results/Results.xlsx`](results/Results.xlsx). Full analysis is in the writeup (see below).
+
+## Known Issues / Limitations
+- Fixed to a 2-lot, 7-node graph — does not generalize to arbitrary graph sizes without code changes.
+- RL agent is retrained from scratch per scenario rather than adapting online to a changing environment.
+
+## Project Management
+GitHub Kanban Board: *not yet set up*
+Wiki: *not yet set up*
+
+Full writeup: [`docs/CP468-TP-35-writeup.pdf`](docs/CP468-TP-35-writeup.pdf) — literature review, system model, methodology, and full results analysis.
+
+## License
+This project was developed as part of the CP468 – Artificial Intelligence course at Wilfrid Laurier University (WLU), Fall 2025. It is intended solely for academic evaluation purposes.
